@@ -31,7 +31,7 @@ import re
 import os
 from pathlib import Path
 
-OBSIDIAN_FOLDER = "/Users/kotomitooyama/kot_memo_obsidian/ワントップ"
+OBSIDIAN_FOLDER = "/Users/kotomitooyama/kot_memo_obsidian/ブログ/ブログ教材「ワントップ」"
 BASE_URL = "https://ayumi-bmethod.com/eztop/"
 
 async def scrape():
