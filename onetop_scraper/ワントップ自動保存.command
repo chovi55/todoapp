@@ -20,12 +20,14 @@ fi
 
 echo "📦 ライブラリをインストール中（初回のみ時間がかかります）..."
 pip3 install playwright html2text --quiet 2>/dev/null
-python3 -m playwright install chromium --quiet 2>/dev/null
+/usr/bin/python3 -m playwright install chromium --quiet 2>/dev/null
 echo "✅ 準備完了"
 echo ""
 
 # Pythonスクリプトを一時ファイルに書き出して実行
-python3 << 'PYEOF'
+TMPPY=$(mktemp /tmp/onetop_XXXXXX.py)
+
+cat > "$TMPPY" << 'PYEOF'
 import asyncio
 import re
 import os
@@ -150,4 +152,5 @@ async def scrape():
 asyncio.run(scrape())
 PYEOF
 
-read -p ""
+python3 "$TMPPY"
+rm -f "$TMPPY"
