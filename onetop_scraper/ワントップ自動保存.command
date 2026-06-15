@@ -122,6 +122,12 @@ async def scrape():
                 markdown = h.handle(main_html)
 
                 filepath = os.path.join(OBSIDIAN_FOLDER, f"{i:03d}_{filename}.md")
+
+                # すでに保存済みのファイルはスキップ
+                if os.path.exists(filepath):
+                    print(f"  ⏭️  スキップ（保存済み）: {filename}.md")
+                    continue
+
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(f"# {title}\n\n")
                     f.write(f"URL: {url}\n\n---\n\n")
