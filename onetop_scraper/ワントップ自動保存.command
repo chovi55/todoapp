@@ -104,17 +104,22 @@ async def scrape():
             print(f"[{i}/{len(course_links)}] {title}")
 
             try:
-                await page.goto(url, wait_until='domcontentloaded', timeout=30000)
-                await page.wait_for_timeout(1500)
+                await page.goto(url, wait_until='networkidle', timeout=60000)
+                await page.wait_for_timeout(3000)
 
                 # メインコンテンツを優先して取得
                 main_html = None
-                for selector in ['article', 'main', '.entry-content', '.post-content', '#content', '.content']:
+                for selector in ['article', 'main', '.entry-content', '.post-content', '#content', '.content', '.wp-block-group', 'body']:
                     try:
                         el = page.locator(selector).first
                         if await el.count() > 0:
-                            main_html = await el.inner_html()
-                            break
+                            html = await el.inner_html()
+                            # テキストが100文字以上あるセレクタを採用
+                            import html as htmllib
+                            text = htmllib.unescape(re.sub(r'<[^>]+>', '', html))
+                            if len(text.strip()) > 100:
+                                main_html = html
+                                break
                     except Exception:
                         continue
 
