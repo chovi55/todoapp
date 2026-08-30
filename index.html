@@ -1,0 +1,1146 @@
+<title>AIポスト工房</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Antique&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* ---------- tokens ---------- */
+:root{
+  --paper:#F2F5F3; --surface:#FFFFFF; --surface-2:#EAEFEC;
+  --ink:#151E1B; --ink-2:#3C4B46; --muted:#6A7B75;
+  --line:#DAE2DE; --line-strong:#C2CEC9;
+  --accent:#0E7C66; --accent-ink:#FFFFFF; --accent-soft:#DCEEE8; --accent-dim:#8FC4B6;
+  --warn:#A4560B; --warn-soft:#FBECD8;
+  --bad:#B03A34; --good:#2C7A4B;
+  --shadow:0 1px 2px rgba(21,30,27,.06), 0 8px 24px -16px rgba(21,30,27,.28);
+  --r-s:6px; --r-m:10px; --r-l:16px;
+  --display:"Zen Antique", serif;
+  --ui:"Zen Kaku Gothic New", -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#101513; --surface:#171E1B; --surface-2:#1F2825;
+    --ink:#E7EEEA; --ink-2:#BCC9C4; --muted:#8698920;
+    --muted:#869892;
+    --line:#28322E; --line-strong:#3A4742;
+    --accent:#3FBFA0; --accent-ink:#08221C; --accent-soft:#17342C; --accent-dim:#2C6D5C;
+    --warn:#D99A4E; --warn-soft:#2E2517;
+    --bad:#E0736C; --good:#5FBF85;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101513; --surface:#171E1B; --surface-2:#1F2825;
+  --ink:#E7EEEA; --ink-2:#BCC9C4; --muted:#869892;
+  --line:#28322E; --line-strong:#3A4742;
+  --accent:#3FBFA0; --accent-ink:#08221C; --accent-soft:#17342C; --accent-dim:#2C6D5C;
+  --warn:#D99A4E; --warn-soft:#2E2517;
+  --bad:#E0736C; --good:#5FBF85;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+body{background:var(--paper); color:var(--ink); font-family:var(--ui); font-size:15px; line-height:1.75;
+  -webkit-font-smoothing:antialiased; margin:0; letter-spacing:.01em}
+button,input,textarea,select{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:3px}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important; transition-duration:.01ms !important}}
+
+/* ---------- shell ---------- */
+.shell{max-width:1240px; margin:0 auto; padding:0 20px 96px}
+.top{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; padding:26px 0 18px; border-bottom:1px solid var(--line)}
+.wordmark{font-family:var(--display); font-size:27px; line-height:1; letter-spacing:.06em}
+.wordmark span{color:var(--accent)}
+.tagline{color:var(--muted); font-size:13px}
+.top .spacer{flex:1}
+.badge{font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  border:1px solid var(--line-strong); border-radius:999px; padding:3px 10px; color:var(--muted)}
+
+.notice{margin:16px 0 0; padding:12px 14px; border:1px solid var(--line-strong); border-left:3px solid var(--warn);
+  background:var(--warn-soft); border-radius:var(--r-s); font-size:13.5px; color:var(--ink-2)}
+.notice b{color:var(--ink)}
+
+/* ---------- persona bar ---------- */
+.persona{margin-top:18px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-m); box-shadow:var(--shadow)}
+.persona>summary{cursor:pointer; list-style:none; padding:11px 16px; display:flex; align-items:center; gap:10px; font-size:13.5px}
+.persona>summary::-webkit-details-marker{display:none}
+.persona>summary::before{content:"▸"; color:var(--accent); font-size:11px; transition:transform .15s}
+.persona[open]>summary::before{transform:rotate(90deg)}
+.persona .sum-label{font-weight:700}
+.persona .sum-value{color:var(--muted); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.persona-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; padding:4px 16px 18px}
+
+/* ---------- layout ---------- */
+.work{display:grid; grid-template-columns:246px minmax(0,1fr); gap:26px; margin-top:24px; align-items:start}
+@media (max-width:900px){ .work{grid-template-columns:1fr; gap:18px} }
+
+/* ---------- tool rail ---------- */
+.rail{position:sticky; top:16px; max-height:calc(100vh - 32px); overflow-y:auto; padding-right:4px;
+  scrollbar-width:thin; scrollbar-color:var(--line-strong) transparent}
+@media (max-width:900px){ .rail{position:static; max-height:none; overflow:visible} }
+.rail-group+.rail-group{margin-top:20px}
+.rail-head{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); padding:0 4px 7px; display:flex; gap:8px; align-items:center}
+.rail-head::after{content:""; flex:1; height:1px; background:var(--line)}
+.rail-list{display:flex; flex-direction:column; gap:3px}
+@media (max-width:900px){
+  .rail-list{flex-direction:row; overflow-x:auto; padding-bottom:6px; scrollbar-width:thin}
+  .rail-list .t-desc{display:none}
+  .tool-btn{white-space:nowrap; flex:0 0 auto}
+}
+.tool-btn{display:block; width:100%; text-align:left; background:none; border:1px solid transparent;
+  border-radius:var(--r-s); padding:7px 10px; cursor:pointer; color:var(--ink-2); transition:background .12s,color .12s}
+.tool-btn:hover{background:var(--surface-2); color:var(--ink)}
+.tool-btn .t-name{font-size:13.5px; font-weight:500; display:block; line-height:1.5}
+.tool-btn .t-desc{font-size:11.5px; color:var(--muted); display:block; line-height:1.5}
+.tool-btn[aria-current="true"]{background:var(--accent-soft); border-color:var(--accent-dim); color:var(--ink)}
+.tool-btn[aria-current="true"] .t-name{font-weight:700}
+
+/* ---------- panel ---------- */
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-l); box-shadow:var(--shadow); overflow:hidden}
+.panel-head{padding:20px 22px 16px; border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent)}
+.panel-head h2{font-size:21px; margin:6px 0 4px; font-weight:700; letter-spacing:.01em; text-wrap:balance}
+.panel-head p{margin:0; color:var(--muted); font-size:13.5px; max-width:62ch}
+.panel-body{padding:18px 22px 22px; display:flex; flex-direction:column; gap:16px}
+
+label.field{display:flex; flex-direction:column; gap:6px}
+.field-label{font-size:12.5px; font-weight:700; color:var(--ink-2)}
+.field-label .opt{font-weight:400; color:var(--muted); font-size:11.5px; margin-left:6px}
+.field-hint{font-size:11.5px; color:var(--muted); line-height:1.6}
+input[type=text], textarea, select{width:100%; background:var(--paper); border:1px solid var(--line-strong);
+  border-radius:var(--r-s); padding:9px 11px; font-size:14.5px; line-height:1.7}
+textarea{resize:vertical; min-height:84px}
+input[type=text]:focus, textarea:focus, select:focus{border-color:var(--accent); outline:none;
+  box-shadow:0 0 0 3px var(--accent-soft)}
+
+.drop{border:1.5px dashed var(--line-strong); border-radius:var(--r-m); padding:16px; text-align:center;
+  background:var(--paper); cursor:pointer; transition:border-color .12s, background .12s}
+.drop:hover,.drop.over{border-color:var(--accent); background:var(--accent-soft)}
+.drop p{margin:0; font-size:13px; color:var(--muted)}
+.drop img{max-height:190px; border-radius:var(--r-s); margin-top:4px}
+
+.actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding-top:2px}
+.btn{border:1px solid var(--line-strong); background:var(--surface); border-radius:var(--r-s);
+  padding:9px 16px; cursor:pointer; font-size:14px; font-weight:500; transition:background .12s,border-color .12s}
+.btn:hover:not(:disabled){background:var(--surface-2)}
+.btn:disabled{opacity:.5; cursor:not-allowed}
+.btn-primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:700}
+.btn-primary:hover:not(:disabled){background:var(--accent); filter:brightness(1.08)}
+.btn-sm{padding:4px 10px; font-size:12px; border-radius:var(--r-s)}
+.actions .grow{flex:1}
+
+/* ---------- output ---------- */
+.out{margin-top:22px; display:flex; flex-direction:column; gap:16px}
+.status{display:flex; align-items:center; gap:11px; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r-m); padding:14px 18px; font-size:14px}
+.pulse{width:9px; height:9px; border-radius:50%; background:var(--accent); flex:0 0 auto;
+  animation:pulse 1.3s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.25; transform:scale(.8)} 50%{opacity:1; transform:scale(1.15)}}
+.status .clock{font-family:var(--mono); font-size:12px; color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums}
+.status.err{border-left:3px solid var(--bad)}
+.status.err .pulse{background:var(--bad); animation:none}
+
+.notes{background:var(--accent-soft); border-radius:var(--r-m); padding:12px 16px; font-size:13.5px; color:var(--ink-2)}
+.notes b{color:var(--ink)}
+
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-m); box-shadow:var(--shadow)}
+.card-head{display:flex; align-items:center; gap:10px; padding:11px 16px; border-bottom:1px solid var(--line)}
+.chip{font-size:11.5px; font-weight:700; letter-spacing:.04em; background:var(--accent-soft); color:var(--accent);
+  border-radius:999px; padding:2px 11px}
+.card-head .spacer{flex:1}
+.count{font-family:var(--mono); font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+.count.over{color:var(--bad); font-weight:600}
+.post-body{padding:15px 18px; white-space:pre-wrap; font-size:15.5px; line-height:1.95; word-break:break-word}
+.thread{border-top:1px dashed var(--line-strong); padding:0 18px 6px 18px}
+.reply{position:relative; padding:13px 0 13px 22px}
+.reply::before{content:""; position:absolute; left:6px; top:0; bottom:0; width:2px; background:var(--line-strong)}
+.reply:last-child::before{bottom:calc(100% - 24px)}
+.reply::after{content:""; position:absolute; left:2.5px; top:19px; width:9px; height:9px; border-radius:50%;
+  background:var(--surface); border:2px solid var(--accent-dim)}
+.reply-label{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; color:var(--muted); text-transform:uppercase}
+.reply-body{white-space:pre-wrap; font-size:15px; line-height:1.95; word-break:break-word}
+.card-foot{display:flex; gap:8px; padding:10px 16px; border-top:1px solid var(--line); background:var(--paper);
+  border-radius:0 0 var(--r-m) var(--r-m); flex-wrap:wrap}
+
+/* review mode */
+.score-row{display:flex; align-items:center; gap:18px; padding:18px; flex-wrap:wrap}
+.score-num{font-family:var(--mono); font-size:44px; font-weight:600; line-height:1; font-variant-numeric:tabular-nums}
+.score-num small{font-size:16px; color:var(--muted); font-weight:400}
+.verdict{flex:1; min-width:240px; font-size:14px; color:var(--ink-2)}
+.axes{display:flex; flex-direction:column; gap:9px; padding:0 18px 18px}
+.axis{display:grid; grid-template-columns:8.5em 1fr auto; gap:12px; align-items:center; font-size:13px}
+.axis-name{color:var(--ink-2); font-weight:500}
+.meter{height:7px; border-radius:99px; background:var(--surface-2); overflow:hidden}
+.meter i{display:block; height:100%; border-radius:99px; background:var(--accent)}
+.axis-note{grid-column:1/-1; color:var(--muted); font-size:12.5px; padding-left:calc(8.5em + 12px); margin-top:-4px}
+.axis-val{font-family:var(--mono); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+.fixes{padding:0 18px 18px; margin:0; display:flex; flex-direction:column; gap:8px; list-style:none}
+.fixes li{position:relative; padding-left:22px; font-size:14px; color:var(--ink-2)}
+.fixes li::before{content:"→"; position:absolute; left:0; color:var(--accent); font-weight:700}
+
+/* ideas mode */
+.idea{display:grid; grid-template-columns:auto 1fr; gap:14px; padding:14px 16px; border-bottom:1px solid var(--line)}
+.idea:last-of-type{border-bottom:none}
+.idea-n{font-family:var(--mono); font-size:12px; color:var(--muted); padding-top:4px; font-variant-numeric:tabular-nums}
+.idea h4{margin:0 0 3px; font-size:15.5px; font-weight:700; line-height:1.6}
+.idea p{margin:0; font-size:13px; color:var(--muted); line-height:1.7}
+.idea-send{margin-top:9px; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+
+/* figure mode */
+.figure-wrap{padding:16px; background:var(--paper); border-radius:0 0 var(--r-m) var(--r-m); overflow-x:auto}
+.figure-wrap svg{display:block; max-width:100%; height:auto; margin:0 auto;
+  border:1px solid var(--line); border-radius:var(--r-s); background:#fff}
+
+.toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(8px); opacity:0;
+  background:var(--ink); color:var(--paper); padding:9px 20px; border-radius:999px; font-size:13.5px;
+  pointer-events:none; transition:opacity .18s, transform .18s; z-index:50}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+
+.foot{margin-top:40px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12.5px;
+  display:flex; gap:16px; flex-wrap:wrap}
+.hide{display:none !important}
+</style>
+
+<div class="shell">
+  <header class="top">
+    <div class="wordmark">AIポスト<span>工房</span></div>
+    <div class="tagline">X / Threads の投稿を、1テーマ入力から5分で。</div>
+    <div class="spacer"></div>
+    <div class="badge" id="mode-badge">起動中</div>
+  </header>
+
+  <div id="offline-notice" class="notice hide">
+    <b>このページ単体ではAIを呼べません。</b>
+    各ツールの「プロンプトをコピー」で指示文を取り出して、ChatGPT / Claude / Gemini に貼り付けても同じ結果が得られます。
+  </div>
+
+  <details class="persona" id="persona">
+    <summary>
+      <span class="sum-label">アカウント設定</span>
+      <span class="sum-value" id="persona-summary">未設定（全ツールの出力に反映されます）</span>
+    </summary>
+    <div class="persona-grid">
+      <label class="field">
+        <span class="field-label">発信ジャンル</span>
+        <input type="text" id="p-genre" placeholder="例：30代からの美容 / 副業ライティング">
+      </label>
+      <label class="field">
+        <span class="field-label">読者（誰に届けたいか）</span>
+        <input type="text" id="p-target" placeholder="例：仕事と育児で時間がない30代女性">
+      </label>
+      <label class="field">
+        <span class="field-label">語り口</span>
+        <select id="p-tone">
+          <option value="やさしい丁寧語。読者に寄り添う">やさしい・寄り添い型</option>
+          <option value="短く言い切る。断定調で歯切れよく">歯切れよく断定する</option>
+          <option value="フランクなタメ口寄り。友達に話すトーン">フランク・友達口調</option>
+          <option value="実績と数字で語る。ビジネス寄りの落ち着いた文体">ビジネス・実績ベース</option>
+        </select>
+      </label>
+      <label class="field">
+        <span class="field-label">一人称 <span class="opt">任意</span></span>
+        <input type="text" id="p-person" placeholder="例：私 / ぼく / うち">
+      </label>
+    </div>
+  </details>
+
+  <div class="work">
+    <nav class="rail" id="rail" aria-label="ツール一覧"></nav>
+    <main>
+      <section class="panel">
+        <div class="panel-head">
+          <div class="eyebrow" id="tool-cat"></div>
+          <h2 id="tool-name"></h2>
+          <p id="tool-desc"></p>
+        </div>
+        <div class="panel-body">
+          <div id="form"></div>
+          <div class="actions">
+            <button class="btn btn-primary" id="run">作成する</button>
+            <button class="btn" id="stop" hidden>止める</button>
+            <span class="grow"></span>
+            <button class="btn btn-sm" id="copy-prompt">プロンプトをコピー</button>
+          </div>
+        </div>
+      </section>
+      <div class="out" id="out"></div>
+    </main>
+  </div>
+
+  <footer class="foot">
+    <span>出力はAIの生成物です。数値・固有名詞・効能は必ずご自身で確認してから投稿してください。</span>
+    <span>文字数は X の全角換算（140字＝280ウェイト）基準です。</span>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+"use strict";
+
+/* ============ utils ============ */
+const $ = (s) => document.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids) if (k != null) n.append(k);
+  return n;
+};
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("apk:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("apk:" + k, JSON.stringify(v)); } catch {} },
+};
+let toastTimer;
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("on"), 2000);
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); toast("コピーしました"); return; } catch {}
+  const ta = el("textarea", { style: "position:fixed;opacity:0" }); ta.value = text;
+  document.body.append(ta); ta.select();
+  try { document.execCommand("copy"); toast("コピーしました"); }
+  catch { toast("コピーできませんでした。長押しで選択してください"); }
+  ta.remove();
+}
+/* X の重み付け文字数（全角=2, 半角=1）を全角換算に直す */
+function jpLen(s) {
+  let w = 0;
+  for (const ch of String(s)) {
+    const c = ch.codePointAt(0);
+    const half = c <= 0x10ff || (c >= 0x2000 && c <= 0x200d) || (c >= 0x2010 && c <= 0x201f) || (c >= 0x2032 && c <= 0x2037);
+    w += half ? 1 : 2;
+  }
+  return Math.ceil(w / 2);
+}
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[c]));
+
+/* ============ 共通プロンプト ============ */
+const CORE = `あなたは、XとThreadsで2万フォロワー超のアカウントを複数運用してきた日本語のSNSコピーライターです。次の運用知見を必ず守って書きます。
+
+【伸びるポストの原則】
+- 1行目で止める。読者の「自分ごと」か「意外性」を最初の15文字以内に置く。
+- 1文を短く。20〜25字前後で改行し、2〜3行ごとに空行を入れて余白をつくる。
+- 抽象語を避け、数字・時間・金額・固有名詞など具体を入れる。
+- 断定する。「〜かもしれません」「〜だと思います」は削る。
+- 結論を先に、理由と具体を後に。
+- 返信（リプ）に続きを置くと滞在時間が伸びる。本文は「続きが気になる」で終える。
+- 読者が「保存したい」「人に教えたい」と思う情報密度にする。
+
+【やらないこと】
+- ハッシュタグは使わない。
+- 絵文字は多用しない。使うなら1ポストに0〜2個、意味のある位置だけ。
+- 「いかがでしたか」「〜していきましょう」「〜な方も多いのではないでしょうか」のようなブログ的・AIらしい定型文を書かない。
+- 体言止めの連発、「である」調と「ですます」調の混在をしない。
+- 検証できない数字・実績・肩書きを勝手に作らない。一般論として言える範囲に留める。
+- 「必ず痩せる」「絶対に稼げる」のような効果保証や、医療・投資の断定的アドバイスを書かない。
+
+【文字数の目安（全角換算）】
+- 短文：40〜60字 / 王道：120〜140字 / リプ誘導の本文：120〜140字、リプは1つ100〜140字。`;
+
+const F_POSTS = `【出力形式】次のJSONだけを返してください。前後に説明文やコードフェンスを付けないでください。
+{"notes":"この案の狙いと投稿時のひと工夫を2文以内で","posts":[{"label":"案の名前","body":"本文","replies":["返信1","返信2"]}]}
+本文や返信の改行は \\n で表してください。返信が不要な案は "replies": [] にしてください。`;
+
+const F_REVIEW = `【出力形式】次のJSONだけを返してください。前後に説明文やコードフェンスを付けないでください。
+{"score":0から100の整数,"verdict":"総評を2〜3文。良い点と致命的な弱点をはっきり書く","breakdown":[{"axis":"評価軸名","score":0から5の整数,"comment":"一言"}],"fixes":["具体的な直し方"],"posts":[{"label":"改善案1","body":"本文","replies":[]}]}
+改行は \\n で表してください。`;
+
+const F_IDEAS = `【出力形式】次のJSONだけを返してください。前後に説明文やコードフェンスを付けないでください。
+{"ideas":[{"title":"そのまま投稿テーマになる一言","type":"向いている型（〇×型/ランキング/共感ストーリー など）","hook":"1行目の書き出し案","why":"伸びやすい理由を一言"}]}`;
+
+const F_FIGURE = `【出力形式】次のJSONだけを返してください。前後に説明文やコードフェンスを付けないでください。
+{"title":"図解のタイトル（全角18字以内）","subtitle":"補足の一行（全角24字以内・不要なら空文字）","items":[{"head":"項目名（全角10字以内）","body":"説明（全角32〜52字。具体的な行動や数字を入れる）"}],"footer":"注意書きや出典の一言（全角30字以内）","posts":[{"label":"図解に添えるポスト案","body":"本文","replies":[]}]}
+- items はちょうど6〜10個。多いほど保存されやすいので、内容が薄くならない範囲で多めに。
+- head は短く、body は必ず具体的に。「意識する」「気をつける」だけで終わらせない。
+- posts は2案。改行は \\n で表してください。`;
+
+function persona() {
+  const g = $("#p-genre").value.trim(), t = $("#p-target").value.trim();
+  const tone = $("#p-tone").value, p = $("#p-person").value.trim();
+  const lines = [];
+  if (g) lines.push(`- 発信ジャンル：${g}`);
+  if (t) lines.push(`- 読者：${t}`);
+  lines.push(`- 語り口：${tone}`);
+  if (p) lines.push(`- 一人称：${p}`);
+  return `\n\n【アカウント設定】この設定に合わせて言葉づかいと題材を選んでください。\n${lines.join("\n")}`;
+}
+
+/* ============ ツール定義 ============ */
+const TOOLS = [
+  {
+    id: "almighty", cat: "ポスト作成", name: "オールマイティ", desc: "短文・王道・リプ誘導を一度に",
+    lead: "テーマを1行入れるだけで、伸びやすい3パターンを同時に作ります。日々の投稿はまずここから。",
+    fields: [
+      { k: "theme", label: "テーマ・言いたいこと", type: "textarea", req: true, ph: "例：日常でのAIの使い方\n例：朝の時間を30分増やす方法", hint: "単語でも、書きかけの文章でも構いません。" },
+    ],
+    mode: "posts",
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次のテーマで、Xに投稿するポストを3案つくってください。
+テーマ：${v.theme}
+
+- 案1「短文」：40〜60字。言い切りで刺す一撃型。返信なし。
+- 案2「王道」：120〜140字。共感→具体→まとめの流れ。返信なし。
+- 案3「リプ誘導」：本文120〜140字で「詳細は返信に」と続きを匂わせ、返信2つに具体を書く。
+- 3案とも切り口を変えること。同じ言い回しを使い回さない。
+
+${F_POSTS}`,
+  },
+  {
+    id: "marubatsu", cat: "ポスト作成", name: "〇×型", desc: "NGと正解の対比でリプ欄まで",
+    lead: "「✕ やりがちなこと」を本文に並べ、「〇 正解」を返信に置く型。リプ欄まで読まれるので滞在時間が伸びます。",
+    fields: [
+      { k: "theme", label: "テーマ", type: "text", req: true, ph: "例：お金を増やすコツ / 肌荒れの対処法" },
+      { k: "count", label: "項目数", type: "select", opts: ["5", "6", "7"], def: "6" },
+    ],
+    mode: "posts",
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次のテーマで「✕（やりがちなNG）」と「〇（正解）」を対比させるポストを作ってください。
+テーマ：${v.theme}
+項目数：${v.count}個
+
+- 本文：導入1行のあと「✕ 〜」を${v.count}行。各行は全角10〜20字で短く。最後に「〇の正解は返信に置いておきます。」の趣旨で締める。
+- 返信1：本文の✕と1対1で対応する「〇 〜」を${v.count}行。順番も揃える。
+- 返信2：全体のまとめを1〜2文＋読者への短い問いかけ。
+- ✕は「本当にやりがちなこと」を選ぶ。誰も間違えないことを並べない。
+- 案は1つでよい。labelは「〇×型」。
+
+${F_POSTS}`,
+  },
+  {
+    id: "ranking", cat: "ポスト作成", name: "ランキング", desc: "順位づけで賛否を呼ぶ定番型",
+    lead: "ランキングは反応が割れやすく、インプレッションが伸びやすい型です。返信に理由を置いて深掘りします。",
+    fields: [
+      { k: "theme", label: "ランキングのお題", type: "text", req: true, ph: "例：ずっるいダイエット習慣 / 買ってよかった時短家電" },
+      { k: "count", label: "何位まで", type: "select", opts: ["3", "5", "7", "10"], def: "5" },
+    ],
+    mode: "posts",
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次のお題でランキング型のポストを作ってください。
+お題：${v.theme}
+順位：${v.count}位まで
+
+- 本文：1行目でお題を言い切り、${v.count}位から1位まで順に並べる。各行は「${v.count}位 〇〇」の形で全角20字以内。
+- 1位は意外性のあるものを置き、「理由は返信に」で締める。
+- 返信1：1位と2位の理由を具体的に（数字や場面を入れる）。
+- 返信2：読者に「あなたの1位は？」と聞く1〜2文。
+- 案は1つでよい。labelは「ランキング」。
+
+${F_POSTS}`,
+  },
+  {
+    id: "story", cat: "ポスト作成", name: "共感ストーリー", desc: "体験談を連投の物語に",
+    lead: "キーワードや出来事から、本文＋連投リプの物語をつくります。最後まで読ませてファン化につなげる型です。",
+    fields: [
+      { k: "theme", label: "題材・キーワード", type: "textarea", req: true, ph: "例：高校の夏の思い出\n例：会社を辞めると言えなかった3年間", hint: "実体験のメモをそのまま貼っても構いません。" },
+      { k: "len", label: "長さ", type: "select", opts: ["本文＋リプ2（短め）", "本文＋リプ3（標準）", "本文＋リプ5（長編）"], def: "本文＋リプ3（標準）" },
+    ],
+    mode: "posts",
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次の題材で、読者の共感を呼ぶストーリーポストを作ってください。
+題材：${v.theme}
+分量：${v.len}
+
+- 本文：情景か会話から始める。説明から入らない。120〜140字で「この先どうなるの？」と思わせて切る。
+- 返信：時系列で場面を進める。1つ100〜140字。心情は「悲しかった」と書かず、動作や情景で見せる。
+- 最後の返信で、読者が自分の話として受け取れる一文に着地させる。教訓を説教くさく語らない。
+- 事実として確認できない固有名詞・数字は入れない。
+- 案は1つでよい。labelは「共感ストーリー」。
+
+${F_POSTS}`,
+  },
+  {
+    id: "medal", cat: "ポスト作成", name: "メダル型", desc: "3つを比べる短尺フォーマット",
+    lead: "金・銀・銅の3段で見せる型。短くて読みやすく、保存とスクショが伸びます。",
+    fields: [
+      { k: "theme", label: "テーマ", type: "text", req: true, ph: "例：初心者が最初に読むべきAI本 / コスパ最強の朝食" },
+    ],
+    mode: "posts",
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次のテーマでメダル型ポストを作ってください。
+テーマ：${v.theme}
+
+- 本文：1行目でテーマを言い切る。続けて 🥇/🥈/🥉 の3行、各行は「🥇 名前 ─ ひと言（全角14字以内）」の形。
+- 最後に選定理由を返信に置く旨を1行。
+- 返信1：3つを選んだ理由と、逆に選ばなかったものを1つ挙げて理由を書く。
+- この型に限り絵文字はメダル3つのみ使用可。他の絵文字は使わない。
+- 案は1つでよい。labelは「メダル型」。
+
+${F_POSTS}`,
+  },
+  {
+    id: "affiliate", cat: "ポスト作成", name: "商品紹介・PR", desc: "商品画像からPR文を3型で",
+    lead: "商品の写真を入れると、見た目とカテゴリから訴求ポイントを組み立てて、短文・王道・リプ誘導のPR文を作ります。",
+    fields: [
+      { k: "img", label: "商品画像", type: "image", hint: "パッケージが写っている写真だと精度が上がります。" },
+      { k: "name", label: "商品名・分かっていること", type: "textarea", ph: "例：無印良品 導入化粧液 200mL 990円\n使ってみた感想があれば添えてください", hint: "画像がない場合はここだけでも作れます。" },
+    ],
+    mode: "posts",
+    need: (v) => v.img || v.name.trim(),
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次の商品を紹介するPRポストを3案つくってください。
+${v.img ? "商品画像を添付しています。パッケージの表記・形状・カテゴリから商品を読み取ってください。\n" : ""}分かっている情報：${v.name.trim() || "（画像のみ）"}
+
+- まず、この商品が「誰の、どんな不便を、どう解決するか」を1つに絞る。機能の羅列にしない。
+- 案1「短文」：40〜60字。使った瞬間の変化を一撃で。
+- 案2「王道」：120〜140字。before→after→ひと押しの流れ。
+- 案3「リプ誘導」：本文で興味を引き、返信1に使い方や注意点、返信2に「詳細はリンクから」の一文。
+- 画像から読み取れない成分・効能・価格・受賞歴は書かない。読み取れない場合は一般的な言い方に留める。
+- 医薬品的な効果効能の断定（治る・治療できる 等）は書かない。
+- PR・広告であることが分かる書き方にする（案文の末尾に「PR」を付ける）。
+
+${F_POSTS}`,
+  },
+  {
+    id: "zukai-cute", cat: "図解メーカー", name: "図解（やわらか）", desc: "パステル配色・情報量多め",
+    lead: "キーワードを入れると、保存されやすい情報密度の図解カードを作ります。PNG / SVG で書き出せます。",
+    fields: [
+      { k: "theme", label: "図解のテーマ", type: "text", req: true, ph: "例：肌悩みマップ / 朝の10分でできること" },
+      { k: "count", label: "項目数", type: "select", opts: ["6", "8", "10"], def: "8" },
+    ],
+    mode: "figure", style: "cute",
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次のテーマで、Xに画像として投稿する「図解」の中身を作ってください。
+テーマ：${v.theme}
+項目数：ちょうど${v.count}個
+
+- 保存したくなる情報密度にする。各項目に「何をどうするか」が具体的に書かれていること。
+- 全体を通して重複した内容を入れない。
+- 医療・健康の話題では断定を避け、footer に「不調が続く場合は専門家へ」の趣旨を入れる。
+- posts は、この図解に添える投稿文を2案。
+
+${F_FIGURE}`,
+  },
+  {
+    id: "zukai-note", cat: "図解メーカー", name: "図解（手書き風）", desc: "ノート風・ジャンルを選ばない",
+    lead: "手書きノート風の図解。ビジネス・学び・旅行など、ジャンルを問わず使えます。",
+    fields: [
+      { k: "theme", label: "図解のテーマ", type: "textarea", req: true, ph: "例：絶対に行くべきオールインクルーシブホテル20選 〜全国編〜", hint: "投稿予定の文章をそのまま貼ってもOKです。" },
+      { k: "count", label: "項目数", type: "select", opts: ["6", "8", "10"], def: "8" },
+    ],
+    mode: "figure", style: "note",
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次の内容で、Xに画像として投稿する「図解」の中身を作ってください。
+内容：${v.theme}
+項目数：ちょうど${v.count}個
+
+- 読み手がスクショして後で見返せる粒度にする。抽象論を並べない。
+- 施設名・商品名・地名などは、一般に広く知られているものだけを使う。曖昧なものは書かない。
+- footer には「情報は変わることがあるため公式サイトで確認を」の趣旨の一言を入れる。
+- posts は、この図解に添える投稿文を2案。
+
+${F_FIGURE}`,
+  },
+  {
+    id: "profile", cat: "アカウント設計", name: "プロフィール最適化", desc: "採点・添削して2案に書き直し",
+    lead: "プロフィールは、投稿を見た人がフォローを決める場所です。今の文を採点したうえで2案に書き直します。",
+    fields: [
+      { k: "bio", label: "今のプロフィール文", type: "textarea", req: true, ph: "例：こんにちは！なんとなくX始めました。ゲームが好きです。ひまなときに見たり、たまに投稿したりします。", hint: "まだ無い場合は、書きたいことを箇条書きで入れてください。" },
+      { k: "proof", label: "実績・強み", type: "textarea", ph: "例：3年で月20万円 / 元美容部員 / 二児の母", hint: "数字があれば必ず入れてください。" },
+    ],
+    mode: "review",
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次のXプロフィールを採点・添削し、書き直してください。
+現在のプロフィール：${v.bio}
+実績・強み：${v.proof.trim() || "（記載なし）"}
+
+【採点軸】次の5つで各5点満点。
+1. 誰に向けた発信か分かるか
+2. フォローで何が得られるか分かるか
+3. 信頼できる根拠（実績・経歴・継続）があるか
+4. 具体性（数字・固有名詞）があるか
+5. 160字の制限内で無駄がないか
+
+- fixes には、この人のプロフィールに固有の直し方だけを書く。一般論を書かない。
+- posts には2案を入れる。label は「シンプル版（1行で言い切る）」と「通常版（実績＋提供価値＋人柄）」。
+- どちらも全角160字以内。改行は \\n で区切り、Xのプロフィール欄にそのまま貼れる形にする。
+- 実績・強みに書かれていないことを勝手に作らない。空欄なら「これから積む姿勢」を書く。
+
+${F_REVIEW}`,
+  },
+  {
+    id: "ideas", cat: "運用サポート", name: "投稿ネタ出し", desc: "伸びやすいネタを10個",
+    lead: "「今日は何を書こう」で止まらないために。出したネタは、そのまま作成ツールに送れます。",
+    fields: [
+      { k: "genre", label: "ジャンル・切り口", type: "text", req: true, ph: "例：ファッション / 30代の転職 / 家計管理" },
+      { k: "avoid", label: "避けたいネタ", type: "text", ph: "例：すでに投稿済みの節約術、政治の話" },
+    ],
+    mode: "ideas",
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次のジャンルで、XとThreadsで伸びやすい投稿ネタを10個提案してください。
+ジャンル：${v.genre}
+${v.avoid.trim() ? `避けたいネタ：${v.avoid.trim()}\n` : ""}
+- 10個の型をばらけさせる（〇×型／ランキング／共感ストーリー／体験談／失敗談／比較／チェックリスト など）。
+- 「〇〇のコツ」のような漠然としたネタを出さない。読んだ人が続きを読みたくなる具体的な切り口にする。
+- hook は実際に1行目に置ける文にする。説明ではなく、そのまま使える形で書く。
+- 季節や時事に依存しすぎるネタは避ける。
+
+${F_IDEAS}`,
+  },
+  {
+    id: "critic", cat: "運用サポート", name: "辛口診断", desc: "投稿前に容赦なく採点",
+    lead: "冒頭は弱くないか、最後まで読まれるか。投稿ボタンを押す前に通してください。",
+    fields: [
+      { k: "post", label: "診断したいポスト案", type: "textarea", req: true, ph: "例：お金を増やしたかったら投資やったほうがいいです。ほんとお金増える。" },
+    ],
+    mode: "review",
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次のポスト案を辛口で診断してください。忖度せず、弱点をはっきり指摘してください。
+ポスト案：${v.post}
+
+【採点軸】次の5つで各5点満点。
+1. 冒頭15字で止められるか
+2. 具体性（数字・場面・固有名詞）があるか
+3. 最後まで読ませる流れになっているか
+4. 読者にとっての得（保存・共有したくなるか）があるか
+5. 読みやすさ（1文の長さ・改行・余白）
+
+- verdict は歯切れよく。「悪くないです」で濁さない。
+- fixes は、この文に対する具体的な直し方を4〜6個。「具体性を出す」ではなく「〇〇を数字に置き換える」まで書く。
+- posts には改善案を3つ。label は「改善案1（冒頭を強くする）」「改善案2（別の切り口）」「改善案3（リプ誘導型）」。
+- 元の主張は変えない。書き手の意図を尊重したうえで強くする。
+
+${F_REVIEW}`,
+  },
+  {
+    id: "coach", cat: "運用サポート", name: "伴走コーチ", desc: "数字を見て次の一手を出す",
+    lead: "投稿のスクリーンショットか数字を渡すと、何が効いたのかを分析して、次にやることを決めます。",
+    fields: [
+      { k: "img", label: "投稿のスクリーンショット", type: "image", hint: "インプレッション等の数字が写っていると精度が上がります。" },
+      { k: "memo", label: "数字・状況メモ", type: "textarea", ph: "例：フォロワー800人。インプ12,000／いいね45／プロフ流入12。ここ2週間は毎日夜9時に投稿。", hint: "画像がない場合はここだけでも分析できます。" },
+    ],
+    mode: "review",
+    need: (v) => v.img || v.memo.trim(),
+    prompt: (v) => `${CORE}${persona()}
+
+【依頼】次の投稿実績を分析し、次の一手を決めてください。
+${v.img ? "投稿のスクリーンショットを添付しています。写っている数字と本文を読み取ってください。\n" : ""}状況メモ：${v.memo.trim() || "（画像のみ）"}
+
+【採点軸】次の5つで各5点満点。読み取れない項目は3点とし、comment に「データ不足」と書く。
+1. 冒頭の引きの強さ
+2. インプレッションに対する反応率
+3. プロフィールへの導線
+4. 投稿の型の選び方
+5. 継続と投稿時間帯の設計
+
+- verdict では「何が効いたのか」「何が足りないのか」を、数字を根拠に言う。読み取れない数字を推測で断定しない。
+- fixes は、明日から手を動かせる粒度で4〜6個。「分析する」ではなく「〇〇を試す」と書く。
+- posts には、次に投稿すべきポスト案を2つ。label は「次の一手1」「次の一手2」。
+
+${F_REVIEW}`,
+  },
+];
+
+/* ============ 状態 ============ */
+let sample = null, downloads = null, imgLimits = null;
+let cur = TOOLS[0];
+let values = {};          // tool id -> {k: value}
+let pickedImage = null;   // File
+let ctl = null, timer = null;
+
+function vals(t = cur) {
+  const v = values[t.id] || (values[t.id] = {});
+  for (const f of t.fields) if (v[f.k] == null) v[f.k] = f.def ?? "";
+  return v;
+}
+function textVals(t = cur) {
+  const v = { ...vals(t) };
+  for (const f of t.fields) if (f.type === "image") v[f.k] = pickedImage ? "画像あり" : "";
+  return v;
+}
+function ready() {
+  const v = textVals();
+  if (cur.need) return !!cur.need(v);
+  return cur.fields.every((f) => !f.req || String(v[f.k] || "").trim());
+}
+
+/* ============ ツール一覧 ============ */
+function renderRail() {
+  const rail = $("#rail");
+  rail.textContent = "";
+  const cats = [...new Set(TOOLS.map((t) => t.cat))];
+  for (const cat of cats) {
+    const list = el("div", { class: "rail-list" });
+    for (const t of TOOLS.filter((x) => x.cat === cat)) {
+      list.append(el("button", {
+        class: "tool-btn", type: "button", "data-id": t.id,
+        "aria-current": t.id === cur.id ? "true" : "false",
+        onclick: () => selectTool(t.id),
+      },
+        el("span", { class: "t-name", text: t.name }),
+        el("span", { class: "t-desc", text: t.desc })));
+    }
+    rail.append(el("div", { class: "rail-group" }, el("div", { class: "rail-head", text: cat }), list));
+  }
+}
+function selectTool(id, seed) {
+  cur = TOOLS.find((t) => t.id === id) || TOOLS[0];
+  store.set("tool", cur.id);
+  pickedImage = null;
+  if (seed) Object.assign(vals(), seed);
+  for (const b of document.querySelectorAll(".tool-btn")) b.setAttribute("aria-current", String(b.dataset.id === cur.id));
+  renderTool();
+  $("#out").textContent = "";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ============ フォーム ============ */
+function renderTool() {
+  $("#tool-cat").textContent = cur.cat;
+  $("#tool-name").textContent = cur.name;
+  $("#tool-desc").textContent = cur.lead;
+  const form = $("#form");
+  form.textContent = "";
+  form.className = "";
+  form.style.cssText = "display:flex;flex-direction:column;gap:16px";
+  const v = vals();
+
+  for (const f of cur.fields) {
+    if (f.type === "image") { form.append(imageField(f)); continue; }
+    let input;
+    if (f.type === "textarea") input = el("textarea", { rows: "3", placeholder: f.ph || "" });
+    else if (f.type === "select") {
+      input = el("select");
+      for (const o of f.opts) input.append(el("option", { value: o, text: o }));
+    } else input = el("input", { type: "text", placeholder: f.ph || "" });
+    input.value = v[f.k] ?? "";
+    input.addEventListener("input", () => { v[f.k] = input.value; store.set("v:" + cur.id, v); syncRun(); });
+    input.addEventListener("change", () => { v[f.k] = input.value; store.set("v:" + cur.id, v); syncRun(); });
+    form.append(el("label", { class: "field" },
+      el("span", { class: "field-label" }, f.label, f.req ? null : el("span", { class: "opt", text: "任意" })),
+      input,
+      f.hint ? el("span", { class: "field-hint", text: f.hint }) : null));
+  }
+  syncRun();
+}
+function imageField(f) {
+  const wrap = el("label", { class: "field" });
+  const drop = el("div", { class: "drop", tabindex: "0", role: "button" });
+  const input = el("input", { type: "file", accept: (imgLimits?.mediaTypes || ["image/*"]).join(","), style: "display:none" });
+  const show = () => {
+    drop.textContent = "";
+    if (pickedImage) {
+      drop.append(el("img", { src: URL.createObjectURL(pickedImage), alt: "選択した画像" }),
+        el("p", { text: pickedImage.name + "（クリックで変更）" }));
+    } else {
+      drop.append(el("p", { text: "画像をドラッグ、またはクリックして選択" }));
+    }
+    syncRun();
+  };
+  const take = (file) => {
+    if (!file) return;
+    if (imgLimits && file.size > imgLimits.maxInputBytes) { toast("画像が大きすぎます"); return; }
+    pickedImage = file; show();
+  };
+  drop.addEventListener("click", () => input.click());
+  drop.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } });
+  drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+  drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+  drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over"); take(e.dataTransfer.files[0]); });
+  input.addEventListener("change", () => take(input.files[0]));
+  wrap.append(el("span", { class: "field-label" }, f.label, el("span", { class: "opt", text: "任意" })), drop, input,
+    f.hint ? el("span", { class: "field-hint", text: f.hint }) : null);
+  show();
+  if (!sample || !imgLimits) wrap.classList.add("hide");
+  return wrap;
+}
+function syncRun() { $("#run").disabled = !ready(); }
+
+/* ============ 実行 ============ */
+const ERRS = {
+  not_granted: "このページからAIを使う許可がありません。表示された確認ダイアログで「許可」を選んでからもう一度お試しください。",
+  sampling_disabled: "ご利用のアカウントではAIの呼び出しが有効になっていません。",
+  not_declared: "このページはAI機能を提供していません。",
+  capability_disabled: "この環境ではAI機能を利用できません。",
+  capability_removed: "この環境ではAI機能を利用できません。",
+  images_unavailable: "この環境では画像を送れません。テキストだけで作成してください。",
+  image_rejected: "画像を読み込めませんでした。JPEG / PNG の別の画像でお試しください。",
+  rate_limited: "呼び出しが混み合っています。少し時間をおいてからもう一度お試しください。",
+  session_expired: "サインインの有効期限が切れました。再度サインインしてください。",
+  refused: "この内容には回答できませんでした。表現やテーマを変えてお試しください。",
+  empty_completion: "うまく生成できませんでした。入力を少し具体的にしてもう一度お試しください。",
+  invalid_json: "出力の形式が崩れました。もう一度お試しください。",
+  prompt_too_large: "入力が長すぎます。要点だけに絞ってください。",
+  upstream_error: "通信に失敗しました。もう一度お試しください。",
+};
+function statusEl(msg, cls) {
+  return el("div", { class: "status" + (cls ? " " + cls : "") },
+    el("span", { class: "pulse" }), el("span", { text: msg }), el("span", { class: "clock" }));
+}
+async function run(refresh) {
+  if (!ready() || ctl) return;
+  const out = $("#out");
+  out.textContent = "";
+  const prompt = cur.prompt(textVals());
+
+  if (!sample) {
+    out.append(statusEl("このページからはAIを呼べません。「プロンプトをコピー」でお使いのAIに貼り付けてください。", "err"));
+    return;
+  }
+  ctl = new AbortController();
+  $("#run").disabled = true; $("#stop").hidden = false;
+  const st = statusEl("考えています…（初回は30〜60秒ほどかかります）");
+  out.append(st);
+  st.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  const t0 = Date.now();
+  timer = setInterval(() => { st.querySelector(".clock").textContent = Math.round((Date.now() - t0) / 1000) + "s"; }, 500);
+
+  const opts = { signal: ctl.signal, modelTier: "default" };
+  if (pickedImage && imgLimits) opts.images = [pickedImage];
+  if (refresh) opts.cache = { gcTime: 300000, refresh: true };
+
+  try {
+    const data = await sample.json(prompt, opts);
+    out.textContent = "";
+    if (cur.mode === "posts") renderPosts(out, data);
+    else if (cur.mode === "review") renderReview(out, data);
+    else if (cur.mode === "ideas") renderIdeas(out, data);
+    else if (cur.mode === "figure") renderFigure(out, data);
+    out.append(el("div", { class: "actions" },
+      el("button", { class: "btn", type: "button", text: "別の案を作り直す", onclick: () => run(true) })));
+  } catch (e) {
+    out.textContent = "";
+    if (e && e.code === "cancelled") { out.append(statusEl("中止しました。", "err")); }
+    else {
+      out.append(statusEl(ERRS[e?.code] || ERRS.upstream_error, "err"));
+      out.append(el("div", { class: "actions" },
+        el("button", { class: "btn", type: "button", text: "もう一度試す", onclick: () => run(true) })));
+    }
+  } finally {
+    clearInterval(timer); ctl = null;
+    $("#stop").hidden = true; syncRun();
+  }
+}
+
+/* ============ 出力の描画 ============ */
+function counterFor(text, limit = 140) {
+  const n = jpLen(text);
+  return el("span", { class: "count" + (n > limit ? " over" : ""), text: `全角換算 ${n} / ${limit}` });
+}
+function postCard(p, limit = 140) {
+  const body = String(p.body ?? "");
+  const replies = Array.isArray(p.replies) ? p.replies.filter(Boolean).map(String) : [];
+  const card = el("div", { class: "card" },
+    el("div", { class: "card-head" },
+      el("span", { class: "chip", text: p.label || "ポスト案" }),
+      el("span", { class: "spacer" }),
+      counterFor(body, limit)),
+    el("div", { class: "post-body", text: body }));
+  if (replies.length) {
+    const th = el("div", { class: "thread" });
+    replies.forEach((r, i) => th.append(el("div", { class: "reply" },
+      el("div", { class: "reply-label" }, `リプ ${i + 1}`, " · ", counterFor(r, limit)),
+      el("div", { class: "reply-body", text: r }))));
+    card.append(th);
+  }
+  const foot = el("div", { class: "card-foot" },
+    el("button", { class: "btn btn-sm", type: "button", text: "本文をコピー", onclick: () => copyText(body) }));
+  if (replies.length) {
+    foot.append(el("button", { class: "btn btn-sm", type: "button", text: "スレッド全体をコピー",
+      onclick: () => copyText([body, ...replies].join("\n\n---\n\n")) }));
+    replies.forEach((r, i) => foot.append(el("button", { class: "btn btn-sm", type: "button",
+      text: `リプ${i + 1}をコピー`, onclick: () => copyText(r) })));
+  }
+  card.append(foot);
+  return card;
+}
+function renderPosts(out, d, limit) {
+  if (d?.notes) out.append(el("div", { class: "notes" }, el("b", { text: "狙い　" }), String(d.notes)));
+  const posts = Array.isArray(d?.posts) ? d.posts : [];
+  if (!posts.length) { out.append(statusEl("案を取り出せませんでした。もう一度お試しください。", "err")); return; }
+  for (const p of posts) out.append(postCard(p, limit));
+}
+function renderReview(out, d) {
+  const score = Math.max(0, Math.min(100, Number(d?.score) || 0));
+  const hue = score >= 70 ? "var(--good)" : score >= 40 ? "var(--warn)" : "var(--bad)";
+  const card = el("div", { class: "card" },
+    el("div", { class: "score-row" },
+      el("div", { class: "score-num", style: `color:${hue}` }, String(score), el("small", { text: " / 100" })),
+      el("div", { class: "verdict", text: String(d?.verdict || "") })));
+  const bd = Array.isArray(d?.breakdown) ? d.breakdown : [];
+  if (bd.length) {
+    const axes = el("div", { class: "axes" });
+    for (const a of bd) {
+      const s = Math.max(0, Math.min(5, Number(a.score) || 0));
+      const c = s >= 4 ? "var(--good)" : s >= 3 ? "var(--accent)" : "var(--bad)";
+      axes.append(el("div", { class: "axis" },
+        el("div", { class: "axis-name", text: String(a.axis || "") }),
+        el("div", { class: "meter" }, el("i", { style: `width:${s / 5 * 100}%;background:${c}` })),
+        el("div", { class: "axis-val", text: `${s}/5` }),
+        a.comment ? el("div", { class: "axis-note", text: String(a.comment) }) : null));
+    }
+    card.append(axes);
+  }
+  const fx = Array.isArray(d?.fixes) ? d.fixes : [];
+  if (fx.length) {
+    const ul = el("ul", { class: "fixes" });
+    for (const f of fx) ul.append(el("li", { text: String(f) }));
+    card.append(el("div", { class: "rail-head", style: "padding:0 18px 8px", text: "直すところ" }), ul);
+  }
+  out.append(card);
+  const posts = Array.isArray(d?.posts) ? d.posts : [];
+  for (const p of posts) out.append(postCard(p, cur.id === "profile" ? 160 : 140));
+}
+function renderIdeas(out, d) {
+  const ideas = Array.isArray(d?.ideas) ? d.ideas : [];
+  if (!ideas.length) { out.append(statusEl("ネタを取り出せませんでした。もう一度お試しください。", "err")); return; }
+  const card = el("div", { class: "card" });
+  ideas.forEach((it, i) => {
+    const title = String(it.title || "");
+    card.append(el("div", { class: "idea" },
+      el("div", { class: "idea-n", text: String(i + 1).padStart(2, "0") }),
+      el("div", {},
+        el("h4", { text: title }),
+        it.hook ? el("p", {}, el("b", { text: "書き出し　" }), String(it.hook)) : null,
+        it.why ? el("p", { text: String(it.why) }) : null,
+        el("div", { class: "idea-send" },
+          el("span", { class: "chip", text: String(it.type || "汎用") }),
+          el("button", { class: "btn btn-sm", type: "button", text: "このネタで作る",
+            onclick: () => selectTool(pickToolFor(it.type), { theme: title }) })))));
+  });
+  out.append(card);
+}
+function pickToolFor(type) {
+  const s = String(type || "");
+  if (s.includes("〇×") || s.includes("○×") || s.includes("マルバツ")) return "marubatsu";
+  if (s.includes("ランキング")) return "ranking";
+  if (s.includes("ストーリー") || s.includes("体験") || s.includes("失敗")) return "story";
+  if (s.includes("メダル")) return "medal";
+  if (s.includes("図解") || s.includes("チェックリスト")) return "zukai-note";
+  return "almighty";
+}
+
+/* ============ 図解の組版 ============ */
+const FIG_W = 1080, FIG_PAD = 48, FIG_GAP = 20, CARD_PAD = 22;
+const mc = document.createElement("canvas").getContext("2d");
+const KINSOKU = "、。，．・）」』】〉》〕｝!?！？ーぁぃぅぇぉっゃゅょゎァィゥェォッャュョ";
+function wrap(text, font, maxW) {
+  mc.font = font;
+  const out = [];
+  for (const para of String(text ?? "").split("\n")) {
+    let line = "";
+    for (const ch of para) {
+      const test = line + ch;
+      if (line && mc.measureText(test).width > maxW) { out.push(line); line = ch; }
+      else line = test;
+    }
+    out.push(line);
+  }
+  for (let i = 1; i < out.length; i++) {
+    while (out[i] && KINSOKU.includes(out[i][0]) && out[i - 1].length > 1) {
+      out[i - 1] += out[i][0]; out[i] = out[i].slice(1);
+    }
+  }
+  return out.filter((l, i) => l !== "" || i === 0);
+}
+function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function handRect(x, y, w, h, rng) {
+  const j = () => (rng() - 0.5) * 7;
+  const P = (a, b) => `${(a).toFixed(1)},${(b).toFixed(1)}`;
+  const p1 = [x + j(), y + j()], p2 = [x + w + j(), y + j()], p3 = [x + w + j(), y + h + j()], p4 = [x + j(), y + h + j()];
+  const m = (a, b) => P((a[0] + b[0]) / 2 + j(), (a[1] + b[1]) / 2 + j());
+  return `M${P(...p1)} Q${m(p1, p2)} ${P(...p2)} Q${m(p2, p3)} ${P(...p3)} Q${m(p3, p4)} ${P(...p4)} Q${m(p4, p1)} ${P(...p1)} Z`;
+}
+function txt(lines, x, y, size, weight, fill, lh, anchor = "start") {
+  return lines.map((l, i) => `<text x="${x}" y="${(y + i * lh).toFixed(1)}" font-family="sans-serif" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}" xml:space="preserve">${esc(l)}</text>`).join("");
+}
+const THEMES = {
+  cute: { bg: "#FFF7F9", band: "#F2879F", bandText: "#FFFFFF", sub: "#FFE3EA",
+    cards: ["#FFFFFF", "#FFF1F5", "#F2F8FF", "#FFFBEE", "#F1FBF4"], stroke: "#F0C6D3",
+    head: "#8A4257", body: "#4C434A", foot: "#A08D96" },
+  note: { bg: "#FDFBF4", band: "#FFE49B", bandText: "#22303B", sub: "#5D6B75",
+    cards: ["#FFFFFF"], stroke: "#66757F", head: "#1E2A33", body: "#3C4954", foot: "#8B939A" },
+};
+function buildFigure(d, style) {
+  const T = THEMES[style] || THEMES.cute;
+  const rng = mulberry32(1337);
+  const items = (Array.isArray(d?.items) ? d.items : []).slice(0, 12)
+    .map((i) => ({ head: String(i.head || ""), body: String(i.body || "") })).filter((i) => i.head || i.body);
+  const titleF = "700 58px sans-serif", subF = "400 27px sans-serif";
+  const headF = "700 32px sans-serif", bodyF = "400 24px sans-serif";
+  const innerW = FIG_W - FIG_PAD * 2;
+  const titleLines = wrap(d?.title || "", titleF, innerW - 56);
+  const subLines = d?.subtitle ? wrap(d.subtitle, subF, innerW - 56) : [];
+  const bandH = 34 + titleLines.length * 72 + (subLines.length ? subLines.length * 40 + 6 : 0) + 30;
+
+  const rows = [];
+  for (let i = 0; i < items.length; i += 2) {
+    const pair = items.slice(i, i + 2);
+    const full = pair.length === 1;
+    const w = full ? innerW : (innerW - FIG_GAP) / 2;
+    const cells = pair.map((it) => {
+      const hl = wrap(it.head, headF, w - CARD_PAD * 2);
+      const bl = wrap(it.body, bodyF, w - CARD_PAD * 2);
+      return { it, hl, bl, w, h: CARD_PAD + hl.length * 44 + 10 + bl.length * 38 + CARD_PAD };
+    });
+    rows.push({ cells, h: Math.max(...cells.map((c) => c.h)) });
+  }
+  const footLines = d?.footer ? wrap(d.footer, "400 21px sans-serif", innerW) : [];
+  const gridH = rows.reduce((a, r) => a + r.h + FIG_GAP, 0) - (rows.length ? FIG_GAP : 0);
+  const H = Math.round(FIG_PAD + bandH + 30 + gridH + (footLines.length ? footLines.length * 30 + 26 : 0) + FIG_PAD);
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FIG_W} ${H}" width="${FIG_W}" height="${H}" role="img" aria-label="${esc(d?.title || "図解")}">`;
+  s += `<rect width="${FIG_W}" height="${H}" fill="${T.bg}"/>`;
+  if (style === "note") {
+    for (let y = 60; y < H; y += 60) s += `<line x1="0" y1="${y}" x2="${FIG_W}" y2="${y}" stroke="#EDE6D2" stroke-width="1"/>`;
+  } else {
+    for (let i = 0; i < 22; i++) {
+      const cx = rng() * FIG_W, cy = rng() * H, r = 3 + rng() * 7;
+      s += `<circle cx="${cx.toFixed(0)}" cy="${cy.toFixed(0)}" r="${r.toFixed(1)}" fill="${T.sub}" opacity="0.55"/>`;
+    }
+  }
+  let y = FIG_PAD;
+  if (style === "cute") {
+    s += `<rect x="${FIG_PAD}" y="${y}" width="${innerW}" height="${bandH}" rx="26" fill="${T.band}"/>`;
+    s += txt(titleLines, FIG_W / 2, y + 34 + 50, 58, 700, T.bandText, 72, "middle");
+    if (subLines.length) s += txt(subLines, FIG_W / 2, y + 34 + titleLines.length * 72 + 34, 27, 400, "#FFE9EF", 40, "middle");
+  } else {
+    const tw = Math.min(innerW, Math.max(...titleLines.map((l) => { mc.font = titleF; return mc.measureText(l).width; })) + 36);
+    titleLines.forEach((l, i) => {
+      mc.font = titleF; const lw = mc.measureText(l).width;
+      s += `<rect x="${(FIG_W / 2 - lw / 2 - 16).toFixed(1)}" y="${(y + 34 + i * 72 + 12).toFixed(1)}" width="${(lw + 32).toFixed(1)}" height="46" rx="6" fill="${T.band}"/>`;
+    });
+    s += txt(titleLines, FIG_W / 2, y + 34 + 50, 58, 700, T.bandText, 72, "middle");
+    if (subLines.length) s += txt(subLines, FIG_W / 2, y + 34 + titleLines.length * 72 + 34, 27, 400, T.sub, 40, "middle");
+    const ry = y + bandH - 6, rr = mulberry32(21);
+    s += `<path d="M${FIG_PAD},${ry.toFixed(1)} Q${(FIG_W / 2).toFixed(0)},${(ry + (rr() - 0.5) * 9).toFixed(1)} ${FIG_W - FIG_PAD},${(ry + (rr() - 0.5) * 6).toFixed(1)}" fill="none" stroke="${T.stroke}" stroke-width="3" stroke-linecap="round" opacity="0.55"/>`;
+    void tw;
+  }
+  y += bandH + 30;
+
+  let n = 0;
+  for (const row of rows) {
+    let x = FIG_PAD;
+    for (const c of row.cells) {
+      const fill = T.cards[n % T.cards.length];
+      if (style === "cute") {
+        s += `<rect x="${x}" y="${y.toFixed(1)}" width="${c.w.toFixed(1)}" height="${row.h.toFixed(1)}" rx="20" fill="${fill}" stroke="${T.stroke}" stroke-width="2.5" stroke-dasharray="9 7"/>`;
+        s += `<circle cx="${(x + 24).toFixed(1)}" cy="${(y + 26).toFixed(1)}" r="7" fill="${T.band}" opacity="0.9"/>`;
+      } else {
+        s += `<path d="${handRect(x, y, c.w, row.h, rng)}" fill="${fill}" stroke="${T.stroke}" stroke-width="2.5" stroke-linejoin="round"/>`;
+        mc.font = headF; const hw = mc.measureText(c.hl[0] || "").width;
+        s += `<rect x="${(x + CARD_PAD).toFixed(1)}" y="${(y + CARD_PAD + 18).toFixed(1)}" width="${hw.toFixed(1)}" height="16" fill="${T.band}" opacity="0.85"/>`;
+      }
+      const tx = x + CARD_PAD + (style === "cute" ? 22 : 0);
+      s += txt(c.hl, tx, y + CARD_PAD + 32, 32, 700, T.head, 44);
+      s += txt(c.bl, x + CARD_PAD, y + CARD_PAD + c.hl.length * 44 + 36, 24, 400, T.body, 38);
+      x += c.w + FIG_GAP; n++;
+    }
+    y += row.h + FIG_GAP;
+  }
+  if (footLines.length) s += txt(footLines, FIG_PAD, y + 16, 21, 400, T.foot, 30);
+  s += `</svg>`;
+  return { svg: s, w: FIG_W, h: H };
+}
+async function svgToPng(fig, scale = 2) {
+  const img = new Image();
+  await new Promise((res, rej) => {
+    img.onload = res; img.onerror = () => rej(new Error("render"));
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(fig.svg);
+  });
+  const c = document.createElement("canvas");
+  c.width = fig.w * scale; c.height = fig.h * scale;
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  return await new Promise((r) => c.toBlob(r, "image/png"));
+}
+function renderFigure(out, d) {
+  const fig = buildFigure(d, cur.style);
+  const name = (String(d?.title || "zukai").replace(/[\\/:*?"<>|\s]+/g, "_") || "zukai").slice(0, 40);
+  const card = el("div", { class: "card" },
+    el("div", { class: "card-head" },
+      el("span", { class: "chip", text: "図解" }),
+      el("span", { class: "spacer" }),
+      el("span", { class: "count", text: `${fig.w} × ${fig.h}px` })));
+  const wrapEl = el("div", { class: "figure-wrap" });
+  wrapEl.innerHTML = fig.svg;
+  card.append(wrapEl);
+  const foot = el("div", { class: "card-foot" });
+  if (downloads) {
+    foot.append(el("button", { class: "btn btn-sm", type: "button", text: "PNGで保存", onclick: async (e) => {
+      const b = e.target; b.disabled = true;
+      try { const png = await svgToPng(fig); await downloads.save({ filename: name + ".png", data: png }); toast("保存しました"); }
+      catch (err) { if (err?.code !== "declined") toast("保存できませんでした"); }
+      finally { b.disabled = false; }
+    } }));
+    foot.append(el("button", { class: "btn btn-sm", type: "button", text: "SVGで保存", onclick: async () => {
+      try { await downloads.save({ filename: name + ".svg", data: fig.svg }); toast("保存しました"); }
+      catch (err) { if (err?.code !== "declined") toast("保存できませんでした"); }
+    } }));
+  } else {
+    foot.append(el("span", { class: "field-hint", text: "この環境では画像を保存できません。図解を長押し／右クリックで保存してください。" }));
+  }
+  card.append(foot);
+  out.append(card);
+  const posts = Array.isArray(d?.posts) ? d.posts : [];
+  for (const p of posts) out.append(postCard(p));
+}
+
+/* ============ 起動 ============ */
+function personaSummary() {
+  const g = $("#p-genre").value.trim(), t = $("#p-target").value.trim();
+  const tone = $("#p-tone").selectedOptions[0]?.textContent || "";
+  const parts = [g, t, tone].filter(Boolean);
+  $("#persona-summary").textContent = parts.length ? parts.join(" ／ ") : "未設定（全ツールの出力に反映されます）";
+}
+function initPersona() {
+  const saved = store.get("persona", {});
+  for (const [id, k] of [["p-genre", "genre"], ["p-target", "target"], ["p-tone", "tone"], ["p-person", "person"]]) {
+    const n = $("#" + id);
+    if (saved[k] != null) n.value = saved[k];
+    const save = () => {
+      store.set("persona", { genre: $("#p-genre").value, target: $("#p-target").value, tone: $("#p-tone").value, person: $("#p-person").value });
+      personaSummary();
+    };
+    n.addEventListener("input", save);
+    n.addEventListener("change", save);
+  }
+  personaSummary();
+  if (!saved.genre) $("#persona").open = true;
+}
+
+$("#run").addEventListener("click", () => run(false));
+$("#stop").addEventListener("click", () => ctl?.abort());
+$("#copy-prompt").addEventListener("click", () => {
+  if (!ready()) { toast("先に入力を埋めてください"); return; }
+  copyText(cur.prompt(textVals()));
+});
+
+initPersona();
+for (const t of TOOLS) values[t.id] = { ...store.get("v:" + t.id, {}) };
+cur = TOOLS.find((t) => t.id === store.get("tool", "almighty")) || TOOLS[0];
+renderRail();
+renderTool();
+
+(async () => {
+  const use = window.claude?.use;
+  if (!use) { $("#mode-badge").textContent = "プロンプト出力のみ"; $("#offline-notice").classList.remove("hide"); return; }
+  const [s, dl] = await Promise.all([
+    Promise.resolve(window.claude.use("sample")).catch(() => null),
+    Promise.resolve(window.claude.use("downloads")).catch(() => null),
+  ]);
+  sample = s; downloads = dl;
+  if (!sample) { $("#mode-badge").textContent = "プロンプト出力のみ"; $("#offline-notice").classList.remove("hide"); return; }
+  $("#mode-badge").textContent = "AI接続済み";
+  const lim = await sample.limits().catch(() => null);
+  imgLimits = lim?.images || null;
+  renderTool();
+})();
+
+})();
+</script>
